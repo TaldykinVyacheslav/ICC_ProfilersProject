@@ -1,6 +1,6 @@
-package com.iccprofileservice.utils;
+package com.duallab.iccprofileservice.utils;
 
-import com.iccprofileservice.domain.ICCProfile;
+import com.duallab.iccprofileservice.domain.ICCProfile;
 import java.awt.color.ColorSpace;
 import java.awt.color.ICC_Profile;
 import java.nio.ByteBuffer;

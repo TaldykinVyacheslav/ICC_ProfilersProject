@@ -1,7 +1,7 @@
-package com.iccprofileservice.service;
+package com.duallab.iccprofileservice.service;
 
-import com.iccprofileservice.dao.ICCProfileDAO;
-import com.iccprofileservice.domain.ICCProfile;
+import com.duallab.iccprofileservice.dao.ICCProfileDAO;
+import com.duallab.iccprofileservice.domain.ICCProfile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

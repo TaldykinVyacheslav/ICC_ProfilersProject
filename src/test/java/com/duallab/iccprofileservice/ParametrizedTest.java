@@ -1,7 +1,7 @@
-package com.iccprofileservice;
+package com.duallab.iccprofileservice;
 
-import com.iccprofileservice.domain.ICCProfile;
-import com.iccprofileservice.utils.ICCProfileParser;
+import com.duallab.iccprofileservice.domain.ICCProfile;
+import com.duallab.iccprofileservice.utils.ICCProfileParser;
 import org.junit.runners.Parameterized;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,8 +34,8 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
  */
 @RunWith(Parameterized.class)
 @WebAppConfiguration
-@ContextConfiguration(locations = {"classpath:spring/mvc-dispatcher-servlet.xml",
-        "classpath:spring/root-context.xml", "classpath:spring/data.xml"})
+@ContextConfiguration(locations = {"classpath:WEB-INF/mvc-dispatcher-servlet.xml",
+        "classpath:WEB-INF/root-context.xml", "classpath:WEB-INF/data.xml"})
 public class ParametrizedTest {
     private static final String PROFILES_DIR = ".\\src\\test\\resources\\iccprofiles\\";
 

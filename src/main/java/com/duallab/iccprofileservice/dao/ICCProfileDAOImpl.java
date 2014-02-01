@@ -1,6 +1,6 @@
-package com.iccprofileservice.dao;
+package com.duallab.iccprofileservice.dao;
 
-import com.iccprofileservice.domain.ICCProfile;
+import com.duallab.iccprofileservice.domain.ICCProfile;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;

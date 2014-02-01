@@ -1,4 +1,4 @@
-package com.iccprofileservice.domain;
+package com.duallab.iccprofileservice.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

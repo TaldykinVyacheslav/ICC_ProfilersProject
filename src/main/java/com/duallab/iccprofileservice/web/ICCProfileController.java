@@ -1,9 +1,9 @@
-package com.iccprofileservice.web;
+package com.duallab.iccprofileservice.web;
 
-import com.iccprofileservice.domain.ICCProfile;
-import com.iccprofileservice.domain.ICCProfilesContainer;
-import com.iccprofileservice.service.ICCProfileService;
-import com.iccprofileservice.utils.ICCProfileParser;
+import com.duallab.iccprofileservice.domain.ICCProfile;
+import com.duallab.iccprofileservice.domain.ICCProfilesContainer;
+import com.duallab.iccprofileservice.service.ICCProfileService;
+import com.duallab.iccprofileservice.utils.ICCProfileParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
