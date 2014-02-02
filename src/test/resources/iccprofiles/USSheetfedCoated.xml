@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<iccprofile description="U.S. Sheetfed Coated v2"
+            id="USSheetfedCoated.icc"
+            numComponents="4"
+            type="CMYK"
+            uri="http://localhost:8087/iccprofiles/USSheetfedCoated.icc/"
+        />

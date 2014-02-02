@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<iccprofile description="Black &amp; White"
+            id="BlackWhite.icc"
+            numComponents="1"
+            type="GRAY"
+            uri="http://localhost:8087/iccprofiles/BlackWhite.icc/"
+        />

@@ -1,0 +1,7 @@
+{
+    "id":"AdobeRGB1998.icc"
+    , "uri":"http://localhost:8087/iccprofiles/AdobeRGB1998.icc/"
+    , "type":"RGB"
+    , "numComponents":3
+    , "description":"Adobe RGB (1998)"
+}

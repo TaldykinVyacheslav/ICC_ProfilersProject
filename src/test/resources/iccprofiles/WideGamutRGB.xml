@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<iccprofile description="Wide Gamut RGB"
+            id="WideGamutRGB.icc"
+            numComponents="3"
+            type="RGB"
+            uri="http://localhost:8087/iccprofiles/WideGamutRGB.icc/"
+        />

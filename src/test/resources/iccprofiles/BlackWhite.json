@@ -1,0 +1,7 @@
+{
+    "id":"BlackWhite.icc"
+    ,"uri":"http://localhost:8087/iccprofiles/BlackWhite.icc/"
+    ,"type":"GRAY"
+    ,"numComponents":1
+    ,"description":"Black & White"
+}

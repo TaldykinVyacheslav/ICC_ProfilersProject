@@ -1,0 +1,7 @@
+{
+    "id":"WideGamutRGB.icc"
+    ,"uri":"http://localhost:8087/iccprofiles/WideGamutRGB.icc/"
+    ,"type":"RGB"
+    ,"numComponents":3
+    ,"description":"Wide Gamut RGB"
+}
