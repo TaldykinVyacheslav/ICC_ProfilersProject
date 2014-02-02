@@ -31,8 +31,8 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
-@ContextConfiguration(locations = {"classpath:WEB-INF/mvc-dispatcher-servlet.xml",
-        "classpath:WEB-INF/root-context.xml", "classpath:WEB-INF/data.xml"})
+@ContextConfiguration(locations = {"classpath:spring/mvc-dispatcher-servlet.xml",
+        "classpath:spring/root-context.xml", "classpath:spring/data.xml"})
 public class UnparametrizedTest {
     private static final String PROFILES_DIR = ".\\src\\test\\resources\\iccprofiles\\";
 
@@ -111,10 +111,10 @@ public class UnparametrizedTest {
             xpathExpression = "/iccprofiles/iccprofile[@id='" + iccProfileObject.getId() + "']/@%s";
 
             result
-                    .andExpect(xpath(String.format(xpathExpression, "id")).string(iccProfileObject.getId()))
-                    .andExpect(xpath(String.format(xpathExpression, "type")).string(iccProfileObject.getType()))
-                    .andExpect(xpath(String.format(xpathExpression, "numComponents")).string(iccProfileObject.getNumComponents().toString()))
-                    .andExpect(xpath(String.format(xpathExpression, "description")).string(iccProfileObject.getDescription()));
+                .andExpect(xpath(String.format(xpathExpression, "id")).string(iccProfileObject.getId()))
+                .andExpect(xpath(String.format(xpathExpression, "type")).string(iccProfileObject.getType()))
+                .andExpect(xpath(String.format(xpathExpression, "numComponents")).string(iccProfileObject.getNumComponents().toString()))
+                .andExpect(xpath(String.format(xpathExpression, "description")).string(iccProfileObject.getDescription()));
         }
     }
 }

@@ -5,6 +5,7 @@ import com.duallab.iccprofileservice.domain.ICCProfilesContainer;
 import com.duallab.iccprofileservice.service.ICCProfileService;
 import com.duallab.iccprofileservice.utils.ICCProfileParser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,6 +25,9 @@ public class ICCProfileController {
 
     @Autowired
     private ICCProfileService iccProfileService;
+
+    @Value("${directoryForUploadedFiles}")
+    private String directoryForUploadedFiles;
     private ICCProfileParser parser;
 
     @ResponseStatus(value = HttpStatus.OK)
@@ -65,8 +69,7 @@ public class ICCProfileController {
         String profileUrl;
 
         parser = new ICCProfileParser();
-        profilerFile = new File(".\\src\\main\\resources\\iccprofiles\\"
-                + profile.getOriginalFilename());
+        profilerFile = new File(directoryForUploadedFiles + profile.getOriginalFilename());
         profileUrl = request.getRequestURL() + "/" + profile.getOriginalFilename() + "/";
 
         profileOutputStream = new FileOutputStream(profilerFile);
