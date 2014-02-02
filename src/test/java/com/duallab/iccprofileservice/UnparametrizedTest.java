@@ -1,7 +1,6 @@
 package com.duallab.iccprofileservice;
 
 import com.duallab.iccprofileservice.domain.ICCProfile;
-import com.duallab.iccprofileservice.utils.ICCProfileParser;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,6 +17,10 @@ import org.springframework.web.context.WebApplicationContext;
 import java.awt.color.ICC_Profile;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import javax.xml.bind.*;
+import javax.xml.xpath.XPathExpressionException;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -34,80 +37,87 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @ContextConfiguration(locations = {"classpath:spring/mvc-dispatcher-servlet.xml",
         "classpath:spring/root-context.xml", "classpath:spring/data.xml"})
 public class UnparametrizedTest {
-    private static final String PROFILES_DIR = ".\\src\\test\\resources\\iccprofiles\\";
+    private static final String RESOURCES_DIR = ".\\src\\test\\resources\\";
+    private static final String PROFILES_ICC_SUBDIR = "iccprofiles\\";
+    private static final String PROFILES_XML_SUBDIR = "xml\\";
 
     private MockMvc mockMvc;
-    private ICCProfileParser parser;
-    private File[] profileFiles;
+    private File[] profileFiles_icc;
+    private File[] profileFiles_xml;
 
     @Autowired
     protected WebApplicationContext wac;
 
     @Before
-    public void setup() {
+    public void setup() throws Exception {
+        initializeTestContext();
+        initializeProfileFiles();
+        uploadICCProfilesOnServer();
+    }
+
+    @Test
+    public void retrieveBriefProfilesInfoTest() throws Exception {
+        ResultActions result;
+        result = getBriefICCProfilesInfoInXml();
+        checkReceivedBriefInformation(result);
+    }
+
+    @Test
+    public void retrieveFullProfilesInfoTest() throws Exception {
+        ResultActions result;
+        result = getFullICCProfilesInfoInXml();
+        checkReceivedFullInformation(result);
+    }
+
+    private void initializeTestContext() {
         this.mockMvc = webAppContextSetup(this.wac).build();
-        profileFiles = (new File(PROFILES_DIR)).listFiles();
-        parser = new ICCProfileParser();
     }
 
-    @Test
-    public void retrieveBriefProfilesInfo() throws Exception {
-        ResultActions result;
+    private void initializeProfileFiles() {
+        profileFiles_icc = (new File(RESOURCES_DIR + PROFILES_ICC_SUBDIR)).listFiles();
+        profileFiles_xml = (new File(RESOURCES_DIR + PROFILES_XML_SUBDIR)).listFiles();
+    }
+
+    private void uploadICCProfilesOnServer() throws Exception {
         MockMultipartFile multipartFile;
 
-        // UPLOAD ALL PROFILES ON SERVER
-        for(File profileFile : profileFiles) {
+        for(File profileFile : profileFiles_icc) {
             multipartFile = new MockMultipartFile("profile", profileFile.getName(),
                     null, (new FileInputStream(profileFile)));
             mockMvc.perform(fileUpload("/iccprofiles").file(multipartFile));
         }
-
-        // GET INFORMATION IN XML ABOUT ALL THE PROFILES
-        result = mockMvc.perform(get("/iccprofiles")
-               .accept(MediaType.APPLICATION_XML))
-               .andExpect(status().isOk());
-
-        // CHECK RETRIEVED INFORMATION
-        for(File profileFile : profileFiles) {
-            ICC_Profile iccProfile;
-            ICCProfile iccProfileObject;
-            String xpathExpression;
-
-            iccProfile = ICC_Profile.getInstance(new FileInputStream(profileFile));
-            iccProfileObject = parser.parse(profileFile.getName(), "some URL", iccProfile);
-            xpathExpression = "/iccprofiles/iccprofile[@id='" + iccProfileObject.getId() + "']/@%s";
-
-            result
-                .andExpect(xpath(String.format(xpathExpression, "id")).string(iccProfileObject.getId()));
-        }
     }
 
-    @Test
-    public void retrieveFullProfilesInfo() throws Exception {
-        ResultActions result;
-        MockMultipartFile multipartFile;
+    private ResultActions getFullICCProfilesInfoInXml() throws Exception {
+        return mockMvc.perform(get("/iccprofiles")
+                    .accept(MediaType.APPLICATION_XML)
+                    .param("resultType", "full"))
+                    .andExpect(status().isOk());
+    }
 
-        // UPLOAD ALL PROFILES ON SERVER
-        for(File profileFile : profileFiles) {
-            multipartFile = new MockMultipartFile("profile", profileFile.getName(),
-                    null, (new FileInputStream(profileFile)));
-            mockMvc.perform(fileUpload("/iccprofiles").file(multipartFile));
-        }
-
-        // GET INFORMATION IN XML ABOUT ALL THE PROFILES
-        result = mockMvc.perform(get("/iccprofiles")
-                .accept(MediaType.APPLICATION_XML)
-                .param("resultType", "full"))
+    private ResultActions getBriefICCProfilesInfoInXml() throws Exception {
+        return mockMvc.perform(get("/iccprofiles")
+                .accept(MediaType.APPLICATION_XML))
                 .andExpect(status().isOk());
+    }
 
-        // CHECK RETRIEVED INFORMATION
-        for(File profileFile : profileFiles) {
-            ICC_Profile iccProfile;
-            ICCProfile iccProfileObject;
-            String xpathExpression;
+    private void checkReceivedBriefInformation(ResultActions result) throws Exception {
+        ICCProfile iccProfileObject;
+        String xpathExpression;
+        for (int i = 0; i < profileFiles_icc.length; i++) {
+            iccProfileObject = unmarshalICCProfileFromXmlFile(profileFiles_xml[i]);
+            xpathExpression = "/iccprofiles/iccprofile[@id='" + iccProfileObject.getId() + "']/@%s";
+            result
+                    .andExpect(xpath(String.format(xpathExpression, "id")).string(iccProfileObject.getId()));
+        }
+    }
 
-            iccProfile = ICC_Profile.getInstance(new FileInputStream(profileFile));
-            iccProfileObject = parser.parse(profileFile.getName(), "some URL", iccProfile);
+    private void checkReceivedFullInformation(ResultActions result) throws Exception {
+        ICCProfile iccProfileObject;
+        String xpathExpression;
+
+        for (int i = 0; i < profileFiles_icc.length; i++) {
+            iccProfileObject = unmarshalICCProfileFromXmlFile(profileFiles_xml[i]);
             xpathExpression = "/iccprofiles/iccprofile[@id='" + iccProfileObject.getId() + "']/@%s";
 
             result
@@ -116,5 +126,11 @@ public class UnparametrizedTest {
                 .andExpect(xpath(String.format(xpathExpression, "numComponents")).string(iccProfileObject.getNumComponents().toString()))
                 .andExpect(xpath(String.format(xpathExpression, "description")).string(iccProfileObject.getDescription()));
         }
+    }
+
+    private ICCProfile unmarshalICCProfileFromXmlFile(File profileFileInXml) throws JAXBException {
+        JAXBContext jc = JAXBContext.newInstance(ICCProfile.class);
+        Unmarshaller unmarshaller = jc.createUnmarshaller();
+        return (ICCProfile)unmarshaller.unmarshal(profileFileInXml);
     }
 }

@@ -1,11 +1,12 @@
 package com.duallab.iccprofileservice;
 
 import com.duallab.iccprofileservice.domain.ICCProfile;
-import com.duallab.iccprofileservice.utils.ICCProfileParser;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.runners.Parameterized;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.apache.commons.io.FilenameUtils;
 
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -16,9 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.awt.color.ICC_Profile;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -37,13 +38,16 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @ContextConfiguration(locations = {"classpath:spring/mvc-dispatcher-servlet.xml",
         "classpath:spring/root-context.xml", "classpath:spring/data.xml"})
 public class ParametrizedTest {
-    private static final String PROFILES_DIR = ".\\src\\test\\resources\\iccprofiles\\";
+    private static final String RESOURCES_DIR = ".\\src\\test\\resources\\";
+    private static final String PROFILES_ICC_SUBDIR = "iccprofiles\\";
+    private static final String PROFILES_JSON_SUBDIR = "json\\";
 
     private MockMvc mockMvc;
-    private File profileFile;
-    private ICCProfileParser parser;
+    private File profileFile_icc;
+    private File profileFile_json;
     private String profileName;
     private TestContextManager testContextManager;
+    private ICCProfile iccProfileObject;
 
     @Autowired
     protected WebApplicationContext wac;
@@ -58,34 +62,26 @@ public class ParametrizedTest {
         File[] profileFiles;
 
         parameters = new ArrayList();
-        profileFiles = (new File(PROFILES_DIR)).listFiles();
+        profileFiles = (new File(RESOURCES_DIR + PROFILES_ICC_SUBDIR)).listFiles();
         for(File file : profileFiles) {
-            parameters.add(new Object[] {file.getName()});
+            parameters.add(new Object[] {FilenameUtils.removeExtension(file.getName())});
         }
-
         return parameters;
     }
 
     @Before
     public void setup() throws Exception {
-        this.testContextManager = new TestContextManager(getClass());
-        this.testContextManager.prepareTestInstance(this);
-        profileFile = new File(PROFILES_DIR + profileName);
-        parser = new ICCProfileParser();
-        this.mockMvc = webAppContextSetup(this.wac).build();
+        initializeTestContext();
+        initializeResourceFiles();
+        initializeICCProfileObject();
     }
 
     @Test
-     public void uploadWithJsonResponse() throws Exception {
+     public void uploadWithJsonResponseTest() throws Exception {
         MockMultipartFile multipartFile;
-        ICC_Profile iccProfile;
-        ICCProfile iccProfileObject;
 
-        iccProfile = ICC_Profile.getInstance(new FileInputStream(profileFile));
-        iccProfileObject = parser.parse(profileName, "some URL", iccProfile);
-        multipartFile = new MockMultipartFile("profile", profileName,
-                null, (new FileInputStream(profileFile)));
-
+        multipartFile = new MockMultipartFile("profile", profileName + ".icc",
+                null, (new FileInputStream(profileFile_icc)));
         mockMvc.perform(fileUpload("/iccprofiles").file(multipartFile)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
@@ -95,16 +91,11 @@ public class ParametrizedTest {
     }
 
     @Test
-    public void uploadWithXmlResponse() throws Exception {
+    public void uploadWithXmlResponseTest() throws Exception {
         MockMultipartFile multipartFile;
-        ICC_Profile iccProfile;
-        ICCProfile iccProfileObject;
 
-        iccProfile = ICC_Profile.getInstance(new FileInputStream(profileFile));
-        iccProfileObject = parser.parse(profileName, "some URL", iccProfile);
-        multipartFile = new MockMultipartFile("profile", profileName,
-                null, (new FileInputStream(profileFile)));
-
+        multipartFile = new MockMultipartFile("profile", profileName + ".icc",
+                null, (new FileInputStream(profileFile_icc)));
         mockMvc.perform(fileUpload("/iccprofiles").file(multipartFile)
                 .accept(MediaType.APPLICATION_XML))
                 .andExpect(status().isCreated())
@@ -115,13 +106,7 @@ public class ParametrizedTest {
     }
 
     @Test
-    public void getSpecificProfile() throws Exception {
-        ICC_Profile iccProfile;
-        ICCProfile iccProfileObject;
-
-        iccProfile = ICC_Profile.getInstance(new FileInputStream(profileFile));
-        iccProfileObject = parser.parse(profileFile.getName(), "some URL", iccProfile);
-
+    public void getSpecificProfileTest() throws Exception {
         mockMvc.perform(get("/iccprofiles/" + iccProfileObject.getId() + "/")
                 .accept(MediaType.APPLICATION_XML))
                 .andExpect(status().isOk())
@@ -129,5 +114,20 @@ public class ParametrizedTest {
                 .andExpect(xpath("/iccprofile/@type").string(iccProfileObject.getType()))
                 .andExpect(xpath("/iccprofile/@numComponents").string(iccProfileObject.getNumComponents().toString()))
                 .andExpect(xpath("/iccprofile/@description").string(iccProfileObject.getDescription()));
+    }
+
+    private void initializeResourceFiles() {
+        profileFile_icc = new File(RESOURCES_DIR + PROFILES_ICC_SUBDIR + profileName + ".icc");
+        profileFile_json = new File(RESOURCES_DIR + PROFILES_JSON_SUBDIR + profileName + ".json");
+    }
+
+    private void initializeTestContext() throws Exception {
+        this.testContextManager = new TestContextManager(getClass());
+        this.testContextManager.prepareTestInstance(this);
+        this.mockMvc = webAppContextSetup(this.wac).build();
+    }
+
+    private void initializeICCProfileObject() throws IOException {
+        iccProfileObject = (new ObjectMapper()).readValue(profileFile_json, ICCProfile.class);
     }
 }
