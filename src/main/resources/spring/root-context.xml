@@ -50,4 +50,6 @@
             </list>
         </property>
       </bean>
+    <bean id="iccProfileAdapter" class="com.duallab.iccprofileservice.adapters.ICCProfileAdapter"/>
+    <bean id="iccProfileParser" class="com.duallab.iccprofileservice.utils.ICCProfileParser"/>
 </beans>

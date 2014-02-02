@@ -1,7 +1,12 @@
 package com.duallab.iccprofileservice.service;
 
 import com.duallab.iccprofileservice.domain.ICCProfile;
+import com.duallab.iccprofileservice.dto.ICCProfileDTO;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -9,7 +14,7 @@ import java.util.List;
  * @author Toldykin Vyacheslav
  */
 public interface ICCProfileService {
-    public void addICCProfile(ICCProfile profile);
+    public ICCProfile addICCProfile(String iccProfileName, byte[] iccProfileBytes) throws IOException;
     public List<ICCProfile> getICCProfiles();
-    public ICCProfile getProfile(String id);
+    public ICCProfile getICCProfileById(String id);
 }

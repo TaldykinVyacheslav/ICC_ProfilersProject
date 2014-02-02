@@ -1,6 +1,6 @@
 package com.duallab.iccprofileservice;
 
-import com.duallab.iccprofileservice.domain.ICCProfile;
+import com.duallab.iccprofileservice.dto.ICCProfileDTO;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.runners.Parameterized;
 import org.junit.Before;
@@ -47,7 +47,7 @@ public class ParametrizedTest {
     private File profileFile_json;
     private String profileName;
     private TestContextManager testContextManager;
-    private ICCProfile iccProfileObject;
+    private ICCProfileDTO iccProfileDTO;
 
     @Autowired
     protected WebApplicationContext wac;
@@ -85,9 +85,9 @@ public class ParametrizedTest {
         mockMvc.perform(fileUpload("/iccprofiles").file(multipartFile)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$id").value(iccProfileObject.getId()))
-                .andExpect(jsonPath("$type").value(iccProfileObject.getType()))
-                .andExpect(jsonPath("$numComponents").value(iccProfileObject.getNumComponents()));
+                .andExpect(jsonPath("$id").value(iccProfileDTO.getId()))
+                .andExpect(jsonPath("$type").value(iccProfileDTO.getType()))
+                .andExpect(jsonPath("$numComponents").value(iccProfileDTO.getNumComponents()));
     }
 
     @Test
@@ -99,21 +99,21 @@ public class ParametrizedTest {
         mockMvc.perform(fileUpload("/iccprofiles").file(multipartFile)
                 .accept(MediaType.APPLICATION_XML))
                 .andExpect(status().isCreated())
-                .andExpect(xpath("/iccprofile/@id").string(iccProfileObject.getId()))
-                .andExpect(xpath("/iccprofile/@type").string(iccProfileObject.getType()))
-                .andExpect(xpath("/iccprofile/@numComponents").string(iccProfileObject.getNumComponents().toString()))
-                .andExpect(xpath("/iccprofile/@description").string(iccProfileObject.getDescription()));
+                .andExpect(xpath("/iccprofile/@id").string(iccProfileDTO.getId()))
+                .andExpect(xpath("/iccprofile/@type").string(iccProfileDTO.getType()))
+                .andExpect(xpath("/iccprofile/@numComponents").string(iccProfileDTO.getNumComponents().toString()))
+                .andExpect(xpath("/iccprofile/@description").string(iccProfileDTO.getDescription()));
     }
 
     @Test
     public void getSpecificProfileTest() throws Exception {
-        mockMvc.perform(get("/iccprofiles/" + iccProfileObject.getId() + "/")
+        mockMvc.perform(get("/iccprofiles/" + iccProfileDTO.getId() + "/")
                 .accept(MediaType.APPLICATION_XML))
                 .andExpect(status().isOk())
-                .andExpect(xpath("/iccprofile/@id").string(iccProfileObject.getId()))
-                .andExpect(xpath("/iccprofile/@type").string(iccProfileObject.getType()))
-                .andExpect(xpath("/iccprofile/@numComponents").string(iccProfileObject.getNumComponents().toString()))
-                .andExpect(xpath("/iccprofile/@description").string(iccProfileObject.getDescription()));
+                .andExpect(xpath("/iccprofile/@id").string(iccProfileDTO.getId()))
+                .andExpect(xpath("/iccprofile/@type").string(iccProfileDTO.getType()))
+                .andExpect(xpath("/iccprofile/@numComponents").string(iccProfileDTO.getNumComponents().toString()))
+                .andExpect(xpath("/iccprofile/@description").string(iccProfileDTO.getDescription()));
     }
 
     private void initializeResourceFiles() {
@@ -128,6 +128,6 @@ public class ParametrizedTest {
     }
 
     private void initializeICCProfileObject() throws IOException {
-        iccProfileObject = (new ObjectMapper()).readValue(profileFile_json, ICCProfile.class);
+        iccProfileDTO = (new ObjectMapper()).readValue(profileFile_json, ICCProfileDTO.class);
     }
 }

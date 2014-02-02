@@ -1,19 +1,19 @@
 package com.duallab.iccprofileservice.web;
 
+import com.duallab.iccprofileservice.adapters.ICCProfileAdapter;
 import com.duallab.iccprofileservice.domain.ICCProfile;
-import com.duallab.iccprofileservice.domain.ICCProfilesContainer;
+import com.duallab.iccprofileservice.dto.ICCProfileDTO;
+import com.duallab.iccprofileservice.dto.ICCProfilesDTOContainer;
 import com.duallab.iccprofileservice.service.ICCProfileService;
-import com.duallab.iccprofileservice.utils.ICCProfileParser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.stereotype.Controller;
 
 import javax.servlet.http.HttpServletRequest;
-import java.awt.color.ICC_Profile;
 import java.io.*;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -25,63 +25,56 @@ public class ICCProfileController {
 
     @Autowired
     private ICCProfileService iccProfileService;
-
-    @Value("${directoryForUploadedFiles}")
-    private String directoryForUploadedFiles;
-    private ICCProfileParser parser;
+    @Autowired
+    private ICCProfileAdapter iccProfileAdapter;
 
     @ResponseStatus(value = HttpStatus.OK)
     @RequestMapping(value = "/iccprofiles", method = RequestMethod.GET)
 	public @ResponseBody
-    ICCProfilesContainer getProfileInfo(@RequestParam Map<String,String> requestParams) {
-        ICCProfilesContainer iccProfilesContainer;
+    ICCProfilesDTOContainer getProfileInfo(@RequestParam Map<String,String> requestParams,
+                                           HttpServletRequest request) {
+        ICCProfilesDTOContainer iccProfilesDTOContainer;
+        List<ICCProfile> iccProfileList;
+        List<ICCProfileDTO> iccProfileDTOList;
 
-        iccProfilesContainer = new ICCProfilesContainer(iccProfileService.getICCProfiles());
-
-        if(!"full".equals(requestParams.get("resultType"))) {
-            for(ICCProfile iccProfile : iccProfilesContainer.getIccProfileList()) {
-                iccProfile.setDescription(null);
-                iccProfile.setType(null);
-                iccProfile.setNumComponents(null);
+        iccProfileList = iccProfileService.getICCProfiles();
+        iccProfileDTOList = iccProfileAdapter.convertToDTO(iccProfileList);
+        iccProfilesDTOContainer = new ICCProfilesDTOContainer(iccProfileDTOList);
+        for(ICCProfileDTO iccProfileDTO : iccProfilesDTOContainer.getIccProfileDTOList()) {
+            iccProfileDTO.setUri(request.getRequestURL() + "/" + iccProfileDTO.getId() + "/");
+            if(!"full".equals(requestParams.get("resultType"))) {
+                iccProfileDTO.setDescription(null);
+                iccProfileDTO.setType(null);
+                iccProfileDTO.setNumComponents(null);
             }
         }
-        return iccProfilesContainer;
+        return iccProfilesDTOContainer;
     }
 
     @ResponseStatus(value = HttpStatus.OK)
     @RequestMapping(value = "/iccprofiles/{profileID}", method = RequestMethod.GET)
     public @ResponseBody
-    ICCProfile getProfileInfo(@PathVariable String profileID) {
-        System.out.println("PROFILE ID IS: " + profileID);
-        return iccProfileService.getProfile(profileID);
+    ICCProfileDTO getProfileInfo(@PathVariable String profileID,
+                                 HttpServletRequest request) {
+        ICCProfile iccProfile;
+        ICCProfileDTO iccProfileDTO;
+        iccProfile = iccProfileService.getICCProfileById(profileID);
+        iccProfileDTO = iccProfileAdapter.convertToDTO(iccProfile);
+        iccProfileDTO.setUri(request.getRequestURL() + "/" + iccProfileDTO.getId() + "/");
+        return iccProfileDTO;
     }
 
     @ResponseStatus(value = HttpStatus.CREATED)
     @RequestMapping(value = "/iccprofiles", method = RequestMethod.POST)
-    public @ResponseBody ICCProfile
-    uploadProfile(@RequestParam("profile") MultipartFile profile, HttpServletRequest request)
-            throws IOException {
-        OutputStream profileOutputStream;
-        InputStream profileInputStream;
-        ICC_Profile iccProfile;
-        ICCProfile iccProfileObject;
-        File profilerFile;
-        String profileUrl;
-
-        parser = new ICCProfileParser();
-        profilerFile = new File(directoryForUploadedFiles + profile.getOriginalFilename());
-        profileUrl = request.getRequestURL() + "/" + profile.getOriginalFilename() + "/";
-
-        profileOutputStream = new FileOutputStream(profilerFile);
-        profileOutputStream.write(profile.getBytes());
-        profileOutputStream.close();
-
-        profileInputStream = new FileInputStream(profilerFile);
-        iccProfile = ICC_Profile.getInstance(profileInputStream);
-        iccProfileObject = parser.parse(profile.getOriginalFilename(), profileUrl, iccProfile);
-        profileInputStream.close();
-        iccProfileService.addICCProfile(iccProfileObject);
-
-        return iccProfileObject;
+    public @ResponseBody ICCProfileDTO
+    uploadProfile(@RequestParam("profile") MultipartFile profile,
+                  HttpServletRequest request) throws IOException {
+        ICCProfileDTO iccProfileDTO;
+        ICCProfile iccProfile;
+        iccProfile = iccProfileService
+                .addICCProfile(profile.getOriginalFilename(), profile.getBytes());
+        iccProfileDTO = iccProfileAdapter.convertToDTO(iccProfile);
+        iccProfileDTO.setUri(request.getRequestURL() + "/" + iccProfileDTO.getId() + "/");
+        return iccProfileDTO;
     }
 }

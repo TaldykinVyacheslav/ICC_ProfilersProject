@@ -10,8 +10,8 @@ import java.nio.ByteBuffer;
  * @author Toldykin Vyacheslav
  */
 public class ICCProfileParser {
-    public ICCProfile parse(String profileName, String uri, ICC_Profile iccProfile) {
-        return new ICCProfile(profileName.replaceAll("\u0002", ""), uri, getProfileType(iccProfile),
+    public ICCProfile parse(String profileName, ICC_Profile iccProfile) {
+        return new ICCProfile(profileName.replaceAll("\u0002", ""), getProfileType(iccProfile),
                 iccProfile.getNumComponents(), getProfileDescription(iccProfile));
     }
 

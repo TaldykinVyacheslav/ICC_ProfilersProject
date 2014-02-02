@@ -1,6 +1,6 @@
 package com.duallab.iccprofileservice;
 
-import com.duallab.iccprofileservice.domain.ICCProfile;
+import com.duallab.iccprofileservice.dto.ICCProfileDTO;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,13 +14,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.awt.color.ICC_Profile;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import javax.xml.bind.*;
-import javax.xml.xpath.XPathExpressionException;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -80,7 +76,6 @@ public class UnparametrizedTest {
 
     private void uploadICCProfilesOnServer() throws Exception {
         MockMultipartFile multipartFile;
-
         for(File profileFile : profileFiles_icc) {
             multipartFile = new MockMultipartFile("profile", profileFile.getName(),
                     null, (new FileInputStream(profileFile)));
@@ -102,35 +97,33 @@ public class UnparametrizedTest {
     }
 
     private void checkReceivedBriefInformation(ResultActions result) throws Exception {
-        ICCProfile iccProfileObject;
+        ICCProfileDTO iccProfileDTO;
         String xpathExpression;
         for (int i = 0; i < profileFiles_icc.length; i++) {
-            iccProfileObject = unmarshalICCProfileFromXmlFile(profileFiles_xml[i]);
-            xpathExpression = "/iccprofiles/iccprofile[@id='" + iccProfileObject.getId() + "']/@%s";
+            iccProfileDTO = unmarshalICCProfileFromXmlFile(profileFiles_xml[i]);
+            xpathExpression = "/iccprofiles/iccprofile[@id='" + iccProfileDTO.getId() + "']/@%s";
             result
-                    .andExpect(xpath(String.format(xpathExpression, "id")).string(iccProfileObject.getId()));
+                    .andExpect(xpath(String.format(xpathExpression, "id")).string(iccProfileDTO.getId()));
         }
     }
 
     private void checkReceivedFullInformation(ResultActions result) throws Exception {
-        ICCProfile iccProfileObject;
+        ICCProfileDTO iccProfileDTO;
         String xpathExpression;
-
         for (int i = 0; i < profileFiles_icc.length; i++) {
-            iccProfileObject = unmarshalICCProfileFromXmlFile(profileFiles_xml[i]);
-            xpathExpression = "/iccprofiles/iccprofile[@id='" + iccProfileObject.getId() + "']/@%s";
-
+            iccProfileDTO = unmarshalICCProfileFromXmlFile(profileFiles_xml[i]);
+            xpathExpression = "/iccprofiles/iccprofile[@id='" + iccProfileDTO.getId() + "']/@%s";
             result
-                .andExpect(xpath(String.format(xpathExpression, "id")).string(iccProfileObject.getId()))
-                .andExpect(xpath(String.format(xpathExpression, "type")).string(iccProfileObject.getType()))
-                .andExpect(xpath(String.format(xpathExpression, "numComponents")).string(iccProfileObject.getNumComponents().toString()))
-                .andExpect(xpath(String.format(xpathExpression, "description")).string(iccProfileObject.getDescription()));
+                .andExpect(xpath(String.format(xpathExpression, "id")).string(iccProfileDTO.getId()))
+                .andExpect(xpath(String.format(xpathExpression, "type")).string(iccProfileDTO.getType()))
+                .andExpect(xpath(String.format(xpathExpression, "numComponents")).string(iccProfileDTO.getNumComponents().toString()))
+                .andExpect(xpath(String.format(xpathExpression, "description")).string(iccProfileDTO.getDescription()));
         }
     }
 
-    private ICCProfile unmarshalICCProfileFromXmlFile(File profileFileInXml) throws JAXBException {
-        JAXBContext jc = JAXBContext.newInstance(ICCProfile.class);
+    private ICCProfileDTO unmarshalICCProfileFromXmlFile(File profileFileInXml) throws JAXBException {
+        JAXBContext jc = JAXBContext.newInstance(ICCProfileDTO.class);
         Unmarshaller unmarshaller = jc.createUnmarshaller();
-        return (ICCProfile)unmarshaller.unmarshal(profileFileInXml);
+        return (ICCProfileDTO)unmarshaller.unmarshal(profileFileInXml);
     }
 }
