@@ -1,7 +1,6 @@
 package com.duallab.iccprofileservice.dao;
 
 import com.duallab.iccprofileservice.domain.ICCProfile;
-
 import java.util.List;
 
 /**

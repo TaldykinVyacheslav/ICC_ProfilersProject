@@ -4,8 +4,22 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
+
+/**
+ * DATABASE SCHEMA:
+ * **********************************************
+ * CREATE DATABASE `iccprofiles_db`;
+ * USE `iccprofiles_db`;
+ *
+ * CREATE TABLE `iccprofiles` (
+ * `id` varchar(50) NOT NULL,
+ * `type` varchar(10) DEFAULT NULL,
+ * `num_components` int(11) DEFAULT NULL,
+ * `description` varchar(200) DEFAULT NULL,
+ * PRIMARY KEY (`id`)
+ * ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+ * **********************************************
+ */
 
 /**
  * @version 1.00 11 Jan 2014
